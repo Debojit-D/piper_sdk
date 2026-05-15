@@ -1,16 +1,33 @@
 #!/usr/bin/env python3
-# -*-coding:utf8-*-
-# 注意demo无法直接运行，需要pip安装sdk后才能运行
-# 使能机械臂 注： 主臂模式下无法使能机械臂
+# -*- coding: utf-8 -*-
+
+"""
+Demo: Enable the Piper robotic arm.
+
+Note:
+- This demo requires the Piper SDK to be installed.
+- The arm cannot be enabled while it is in master/teaching mode.
+- Make sure the CAN interface is already up before running this script:
+    sudo ip link set can0 type can bitrate 1000000
+    sudo ip link set can0 up
+"""
+
 import time
 from piper_sdk import *
 
-# 测试代码
+
 if __name__ == "__main__":
-    piper = C_PiperInterface_V2()
+    # Create Piper interface on CAN port can0
+    piper = C_PiperInterface_V2(can_name="can1")
+
+    # Connect to the CAN port
     piper.ConnectPort()
+
+    # Small delay to allow the connection thread to start
     time.sleep(0.1)
-    while( not piper.EnablePiper()):
+
+    # Keep trying until the arm is enabled
+    while not piper.EnablePiper():
         time.sleep(0.01)
-    print("使能成功!!!!")
-    
+
+    print("Piper arm enabled successfully!")

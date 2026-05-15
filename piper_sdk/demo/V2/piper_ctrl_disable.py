@@ -1,15 +1,29 @@
 #!/usr/bin/env python3
-# -*-coding:utf8-*-
-# 注意demo无法直接运行，需要pip安装sdk后才能运行
-# 使能机械臂
+# -*- coding: utf-8 -*-
+
+"""
+Demo: Disable the Piper robotic arm.
+
+Note:
+- This demo requires the Piper SDK to be installed.
+- Make sure the CAN interface is already up before running this script:
+    sudo ip link set can0 type can bitrate 1000000
+    sudo ip link set can0 up
+"""
+
 import time
 from piper_sdk import *
 
-# 测试代码
+
 if __name__ == "__main__":
-    piper = C_PiperInterface_V2()
+    # Create Piper interface on CAN port can0
+    piper = C_PiperInterface_V2(can_name="can1")
+
+    # Connect to the CAN port
     piper.ConnectPort()
-    while(piper.DisablePiper()):
+
+    # Keep trying until the arm is disabled
+    while piper.DisablePiper():
         time.sleep(0.01)
-    print("失能成功!!!!")
-    
+
+    print("Piper arm disabled successfully!")

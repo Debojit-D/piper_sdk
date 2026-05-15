@@ -1,32 +1,62 @@
 #!/usr/bin/env python3
-# -*-coding:utf8-*-
-# 注意demo无法直接运行，需要pip安装sdk后才能运行
+# -*- coding: utf-8 -*-
+
+"""
+Demo: Control the Piper gripper.
+
+Note:
+- This demo requires piper_sdk to be installed before running.
+- Make sure the CAN interface is already active before running:
+    sudo ip link set can0 type can bitrate 1000000
+    sudo ip link set can0 up
+"""
+
 import time
 from piper_sdk import *
 
+
 if __name__ == "__main__":
-    piper = C_PiperInterface_V2("can0")
+    # Select the Piper arm connected on CAN interface can0
+    piper = C_PiperInterface_V2(can_name="can1")
+
+    # Connect to the CAN port
     piper.ConnectPort()
-    while( not piper.EnablePiper()):
+
+    # Enable the robotic arm
+    while not piper.EnablePiper():
         time.sleep(0.01)
-    piper.GripperCtrl(0,1000,0x02, 0)
-    piper.GripperCtrl(0,1000,0x01, 0)
-    range = 0
+
+    # Initialize/reset gripper control
+    piper.GripperCtrl(0, 1000, 0x02, 0)
+
+    # Enable gripper control
+    piper.GripperCtrl(0, 1000, 0x01, 0)
+
+    gripper_range = 0
     count = 0
+
     while True:
+        # Print current gripper feedback message
         print(piper.GetArmGripperMsgs())
-        count  = count + 1
-        if(count == 0):
+
+        count = count + 1
+
+        if count == 0:
             print("1-----------")
-            range = 0
-        elif(count == 300):
+            gripper_range = 0
+
+        elif count == 300:
             print("2-----------")
-            range = 0.05 * 1000 * 1000 # 0.05m = 50mm
-        elif(count == 600):
+            gripper_range = 0.07 * 1000 * 1000  # 0.05 m = 50 mm
+
+        elif count == 600:
             print("3-----------")
-            range = 0
+            gripper_range = 0
             count = 0
-        range = round(range)
-        piper.GripperCtrl(abs(range), 1000, 0x01, 0)
+
+        gripper_range = round(gripper_range)
+
+        # Send gripper position command
+        piper.GripperCtrl(abs(gripper_range), 1000, 0x01, 0)
+
         time.sleep(0.005)
-    
